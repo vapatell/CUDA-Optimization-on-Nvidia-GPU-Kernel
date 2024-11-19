@@ -21,7 +21,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
   int BLUR_SIZE = 2;
   
-  if (Col < w && Row < h) 
+  if (Col < width && Row < height) 
   {
     int pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
@@ -32,16 +32,16 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         int curRow = Row + blurRow;
         int curCol = Col + blurCol;
         // Verify we have a valid image pixel
-        if(curRow > -1 && curRow < h && curCol > -1 && curCol < w) 
+        if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
-          pixVal += in[curRow * w + curCol];
+          pixVal += in[curRow * width + curCol];
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
       }
     }
     // Write our new average pixel value out
-    out[Row * w + Col] = (unsigned char)(pixVal / pixels);
+    out[Row * width + Col] = (unsigned char)(pixVal / pixels);
   }
 }
 ///////////////////////////////////////////////////////
@@ -93,11 +93,11 @@ int main(int argc, char *argv[]) {
   // Transfer data from CPU to GPU
   cudaMemcpy(deviceInputImageData, hostInputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyHostToDevice);
   dim3 dimBlock(16, 16, 1);
-  dim3 dimGrid(ceil(imgWidth/16.0), ceil(imgHeight/16.0), 1);
+  dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
   
   // Call your GPU kernel 10 times
   for(int i = 0; i < 10; i++)
-  imgBlurGPU<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+  blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
 
   // Transfer data from GPU to CPU
   cudaMemcpy(hostOutputImageData, deviceOutputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyDeviceToHost);
