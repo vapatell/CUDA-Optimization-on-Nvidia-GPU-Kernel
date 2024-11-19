@@ -65,14 +65,14 @@ __global__ void blurKernel(unsigned char *output, unsigned char *input, int widt
                 int curCol = Col + blurCol;
 
                 // check if neighbouring poxel is within image boundaries
-                if (curRow > -1 && curRow < HEIGHT && curCol > -1 && curCol < WIDTH){
-                    pixVal += input[curRow * WIDTH + curCol];
+                if (curRow > -1 && curRow < height && curCol > -1 && curCol < width){
+                    pixVal += input[curRow * width + curCol];
                     pixels++;
                 }
             }
         }
 
-        output[Row*WIDTH +Col] = (unsigned char) (pixVal / pixels); // calculate average of pixel value
+        output[Row*width +Col] = (unsigned char) (pixVal / pixels); // calculate average of pixel value
     }
 }
 ///////////////////////////////////////////////////////
