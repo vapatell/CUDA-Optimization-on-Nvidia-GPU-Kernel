@@ -11,7 +11,8 @@
     }									\
   } while (0)
 
-#define BLUR_SIZE 21
+//#define BLUR_SIZE 21
+#define FILTER_SIZE 11
 
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
@@ -76,7 +77,7 @@
 //     }
 // }
 
-__global__ void imgBlurGPU(float* outImg, float* inImg, int width, int height) {
+__global__ void blurKernel(float* outImg, float* inImg, int width, int height) {
     int filterRow, filterCol;
     int cornerRow, cornerCol;
     int tx = threadIdx.x; int ty = threadIdx.y;
