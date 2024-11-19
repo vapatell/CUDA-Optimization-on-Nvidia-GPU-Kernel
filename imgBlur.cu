@@ -15,35 +15,35 @@
 
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
-__global__ void blurKernel(float *out, float *in, int width, int height) 
-{
-  int Col = blockIdx.x * blockDim.x + threadIdx.x;
-  int Row = blockIdx.y * blockDim.y + threadIdx.y;
+// __global__ void blurKernel(float *out, float *in, int width, int height) 
+// {
+//   int Col = blockIdx.x * blockDim.x + threadIdx.x;
+//   int Row = blockIdx.y * blockDim.y + threadIdx.y;
  
   
-  if (Col < width && Row < height) 
-  {
-    int pixVal = 0; int pixels = 0;
-    // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
-    for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
-    {
-      for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
-      {
-        int curRow = Row + blurRow;
-        int curCol = Col + blurCol;
-        // Verify we have a valid image pixel
-        if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
-        {
-          pixVal += in[curRow * width + curCol];
-          // Keep track of number of pixels in the accumulated total
-          pixels++;
-        }
-      }
-    }
-    // Write our new average pixel value out
-    out[Row * width + Col] = (float)(pixVal / pixels);
-  }
-}
+//   if (Col < width && Row < height) 
+//   {
+//     int pixVal = 0; int pixels = 0;
+//     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
+//     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
+//     {
+//       for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
+//       {
+//         int curRow = Row + blurRow;
+//         int curCol = Col + blurCol;
+//         // Verify we have a valid image pixel
+//         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
+//         {
+//           pixVal += in[curRow * width + curCol];
+//           // Keep track of number of pixels in the accumulated total
+//           pixels++;
+//         }
+//       }
+//     }
+//     // Write our new average pixel value out
+//     out[Row * width + Col] = (float)(pixVal / pixels);
+//   }
+// }
 
 // __global__ void blurKernel(float *output, float *input, int width, int height)
 // {
@@ -75,6 +75,46 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 //         output[Row*width +Col] = (float) (pixVal / pixels); // calculate average of pixel value
 //     }
 // }
+
+__global__ void imgBlurGPU(float* outImg, float* inImg, int width, int height) {
+    int filterRow, filterCol;
+    int cornerRow, cornerCol;
+    int tx = threadIdx.x; int ty = threadIdx.y;
+    int bx = blockIdx.x; int by = blockIdx.y;
+    int filterSize = 2*FILTER_SIZE + 1;
+
+    // compute global thread coordinates
+    int row = by * blockDim.y + ty;
+    int col = bx * blockDim.x + tx;
+
+    // make sure thread is within image boundaries
+    if ((row < height) && (col < width)) {
+        // instantiate accumulator
+        int numPixels = 0;
+        int cumSum = 0;
+
+        // top-left corner coordinates
+        cornerRow = row - FILTER_SIZE;
+        cornerCol = col - FILTER_SIZE;
+
+        // accumulate values inside filter
+        for (int i = 0; i < filterSize; i++) {
+            for (int j = 0; j < filterSize; j++) {
+                // filter coordinates
+                filterRow = cornerRow + i;
+                filterCol = cornerCol + j;
+
+                // accumulate sum
+                if ((filterRow >= 0) && (filterRow <= height) && (filterCol >= 0) && (filterCol <= width)) {
+                    cumSum += inImg[filterRow*width + filterCol];
+                    numPixels++;
+                }
+            }
+        }
+        // set the value of output
+        outImg[row*width + col] = (float)(cumSum / numPixels);
+    }
+}
 ///////////////////////////////////////////////////////
 
 int main(int argc, char *argv[]) {
@@ -123,6 +163,7 @@ int main(int argc, char *argv[]) {
 
   // Transfer data from CPU to GPU
   cudaMemcpy(deviceInputImageData, hostInputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyHostToDevice);
+  
   dim3 dimBlock(16, 16, 1);
   dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
   
