@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
   {
     printf("iter: %d\n", i);
     //blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
-    blurKernel<<<1, 129>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+    blurKernel<<<1, 2000>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
   }
   // Transfer data from GPU to CPU
   cudaMemcpy(hostOutputImageData, deviceOutputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyDeviceToHost);
