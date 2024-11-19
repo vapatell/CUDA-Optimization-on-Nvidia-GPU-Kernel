@@ -157,6 +157,8 @@ int main(int argc, char *argv[]) {
   hostOutputImageData = wbImage_getData(outputImage);
   goldOutputImageData = wbImage_getData(goldImage);
 
+  for(int i = 0; i < 2; i++)
+    printf("img[%d]: %f", i, hostInputImageData);
   // Start timer
   timespec timer = tic();
   
