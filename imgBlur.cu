@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
   //dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
   
   // Call your GPU kernel 10 times
-  //for(int i = 0; i < 10; i++)
+  for(int i = 0; i < 2; i++)
   //blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
   blurKernel<<<1, 1>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
 
