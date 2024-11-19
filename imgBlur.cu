@@ -11,7 +11,7 @@
     }									\
   } while (0)
 
-#define BLUR_SIZE 2
+#define BLUR_SIZE 21
 //#define FILTER_SIZE 11
 
 ///////////////////////////////////////////////////////
@@ -23,11 +23,11 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   printf("Col: %d\n", Col);
   printf("Row: %d\n", Row);
   
-  for(int i = 0; i < 25; i++)
-  {
-    printf("img[%d]: %f \n", i, in[i]);
-    //printf("goldimg[%d]: %f \n", i, goldOutputImageData[i]);
-  }
+  // for(int i = 0; i < 25; i++)
+  // {
+  //   printf("img[%d]: %f \n", i, in[i]);
+  //   //printf("goldimg[%d]: %f \n", i, goldOutputImageData[i]);
+  // }
 
   if (Col < width && Row < height) 
   {
