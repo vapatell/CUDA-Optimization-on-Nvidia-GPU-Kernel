@@ -47,7 +47,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
           pixVal += in[curRow * width + curCol];
           printf("pixVal: %d\n", pixVal);
           printf("curRow * width + curCol: %d\n", (curRow * width + curCol));
-          printf("in: %d\n", in[curRow * width + curCol]);
+          printf("in: %f\n", in[curRow * width + curCol]);
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
