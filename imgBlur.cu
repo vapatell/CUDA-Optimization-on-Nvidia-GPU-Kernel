@@ -22,7 +22,13 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
   printf("Col: %d\n", Col);
   printf("Row: %d\n", Row);
- 
+  
+  for(int i = 0; i < 25; i++)
+  {
+    printf("img[%d]: %f \n", i, in[i]);
+    //printf("goldimg[%d]: %f \n", i, goldOutputImageData[i]);
+  }
+
   if (Col < width && Row < height) 
   {
     int pixVal = 0; int pixels = 0;
@@ -157,11 +163,9 @@ int main(int argc, char *argv[]) {
   hostOutputImageData = wbImage_getData(outputImage);
   goldOutputImageData = wbImage_getData(goldImage);
 
-  for(int i = 0; i < 25; i++)
-  {
-    printf("img[%d]: %f \n", i, hostInputImageData[i]);
-    printf("goldimg[%d]: %f \n", i, goldOutputImageData[i]);
-  }
+  printf("imgWidth: %d", imageWidth);
+  printf("imgHeight: %d", imageHeight);
+
   // Start timer
   timespec timer = tic();
   
