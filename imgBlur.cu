@@ -41,11 +41,11 @@
 //       }
 //     }
 //     // Write our new average pixel value out
-//     out[Row * width + Col] = (unsigned char)(pixVal / pixels);
+//     out[Row * width + Col] = (float)(pixVal / pixels);
 //   }
 // }
 
-__global__ void blurKernel(unsigned char *output, unsigned char *input, int width, int height)
+__global__ void blurKernel(float *output, float *input, int width, int height)
 {
     // calculate global row and column index
     int Col = blockIdx.x * blockDim.x + threadIdx.x;
@@ -72,7 +72,7 @@ __global__ void blurKernel(unsigned char *output, unsigned char *input, int widt
             }
         }
 
-        output[Row*width +Col] = (unsigned char) (pixVal / pixels); // calculate average of pixel value
+        output[Row*width +Col] = (float) (pixVal / pixels); // calculate average of pixel value
     }
 }
 ///////////////////////////////////////////////////////
