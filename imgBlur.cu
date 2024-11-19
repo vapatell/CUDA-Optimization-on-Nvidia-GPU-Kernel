@@ -11,38 +11,69 @@
     }									\
   } while (0)
 
-#define BLUR_SIZE 21
+//#define BLUR_SIZE 21
 
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
-__global__ void blurKernel(float *out, float *in, int width, int height) 
-{
-  int Col = blockIdx.x * blockDim.x + threadIdx.x;
-  int Row = blockIdx.y * blockDim.y + threadIdx.y;
-  int BLUR_SIZE = 2;
+// __global__ void blurKernel(float *out, float *in, int width, int height) 
+// {
+//   int Col = blockIdx.x * blockDim.x + threadIdx.x;
+//   int Row = blockIdx.y * blockDim.y + threadIdx.y;
+ 
   
-  if (Col < width && Row < height) 
-  {
-    int pixVal = 0; int pixels = 0;
-    // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
-    for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
-    {
-      for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
-      {
-        int curRow = Row + blurRow;
-        int curCol = Col + blurCol;
-        // Verify we have a valid image pixel
-        if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
-        {
-          pixVal += in[curRow * width + curCol];
-          // Keep track of number of pixels in the accumulated total
-          pixels++;
+//   if (Col < width && Row < height) 
+//   {
+//     int pixVal = 0; int pixels = 0;
+//     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
+//     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
+//     {
+//       for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
+//       {
+//         int curRow = Row + blurRow;
+//         int curCol = Col + blurCol;
+//         // Verify we have a valid image pixel
+//         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
+//         {
+//           pixVal += in[curRow * width + curCol];
+//           // Keep track of number of pixels in the accumulated total
+//           pixels++;
+//         }
+//       }
+//     }
+//     // Write our new average pixel value out
+//     out[Row * width + Col] = (unsigned char)(pixVal / pixels);
+//   }
+// }
+
+__global__ void blurKernel(unsigned char *output, unsigned char *input, int width, int height)
+{
+    // calculate global row and column index
+    int Col = blockIdx.x * blockDim.x + threadIdx.x;
+    int Row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // ensure thread is processing a valid pixel within image boundaries
+    if(Col < width && Row < height){
+        int pixVal = 0; 
+        int pixels = 0;
+        int BLUR_SIZE = 3; // size of blur kernel (3x3)
+
+        // iterate over blur kernel
+        for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE + 1; ++blurRow){
+            for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE +1; ++blurCol){
+
+                int curRow = Row + blurRow;
+                int curCol = Col + blurCol;
+
+                // check if neighbouring poxel is within image boundaries
+                if (curRow > -1 && curRow < HEIGHT && curCol > -1 && curCol < WIDTH){
+                    pixVal += input[curRow * WIDTH + curCol];
+                    pixels++;
+                }
+            }
         }
-      }
+
+        output[Row*WIDTH +Col] = (unsigned char) (pixVal / pixels); // calculate average of pixel value
     }
-    // Write our new average pixel value out
-    out[Row * width + Col] = (unsigned char)(pixVal / pixels);
-  }
 }
 ///////////////////////////////////////////////////////
 
