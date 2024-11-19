@@ -31,7 +31,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 
   if (Col < width && Row < height) 
   {
-    int pixVal = 0; int pixels = 0;
+    float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
     {
