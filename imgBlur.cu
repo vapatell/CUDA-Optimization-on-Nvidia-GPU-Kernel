@@ -45,14 +45,16 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
           pixVal += in[curRow * width + curCol];
-          printf("pixVal: %f\n", pixVal);
-          printf("curRow * width + curCol: %d\n", (curRow * width + curCol));
-          printf("in: %f\n", in[curRow * width + curCol]);
+          // printf("pixVal: %f\n", pixVal);
+          // printf("curRow * width + curCol: %d\n", (curRow * width + curCol));
+          // printf("in: %f\n", in[curRow * width + curCol]);
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
       }
     }
+    printf("pixVal: %f\n", pixVal);
+    printf("pixels: %d\n", pixels);
     // Write our new average pixel value out
     out[Row * width + Col] = (float)(pixVal / pixels);
     printf("Row * width + Col: %d\n", Row * width + Col);
@@ -166,8 +168,8 @@ int main(int argc, char *argv[]) {
   hostOutputImageData = wbImage_getData(outputImage);
   goldOutputImageData = wbImage_getData(goldImage);
 
-  printf("imgWidth: %d", imageWidth);
-  printf("imgHeight: %d", imageHeight);
+  printf("imgWidth: %d\n", imageWidth);
+  printf("imgHeight: %d\n", imageHeight);
 
   // Start timer
   timespec timer = tic();
@@ -187,9 +189,11 @@ int main(int argc, char *argv[]) {
   
   // Call your GPU kernel 10 times
   for(int i = 0; i < 2; i++)
-  //blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
-  blurKernel<<<1, 1>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
-
+  {
+    printf("iter: %d\n", i);
+    //blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+    blurKernel<<<1, 1>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+  }
   // Transfer data from GPU to CPU
   cudaMemcpy(hostOutputImageData, deviceOutputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyDeviceToHost);
   ///////////////////////////////////////////////////////
