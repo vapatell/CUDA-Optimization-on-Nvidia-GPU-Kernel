@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
   goldOutputImageData = wbImage_getData(goldImage);
 
   for(int i = 0; i < 25; i++)
-    printf("goldimg[%d]: %f \n", i, goldOutputImageData);
+    printf("goldimg[%d]: %f \n", i, goldOutputImageData[i]);
   // Start timer
   timespec timer = tic();
   
