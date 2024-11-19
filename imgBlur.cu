@@ -33,10 +33,13 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
       {
         int curRow = Row + blurRow;
         int curCol = Col + blurCol;
+        printf("curCol: %d\n", curCol);
+        printf("curRow: %d\n", curRow);
         // Verify we have a valid image pixel
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
           pixVal += in[curRow * width + curCol];
+          printf("pixVal: %d\n", pixVal);
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
@@ -44,6 +47,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
     }
     // Write our new average pixel value out
     out[Row * width + Col] = (float)(pixVal / pixels);
+    printf("out: %f\n", out[Row * width + Col]);
   }
 }
 
@@ -170,7 +174,7 @@ int main(int argc, char *argv[]) {
   //dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
   
   // Call your GPU kernel 10 times
-  for(int i = 0; i < 2; i++)
+  //for(int i = 0; i < 2; i++)
   //blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
   blurKernel<<<1, 1>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
 
