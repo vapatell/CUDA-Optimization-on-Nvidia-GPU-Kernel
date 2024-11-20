@@ -12,17 +12,74 @@
   } while (0)
 
 #define BLUR_SIZE 21
-//#define FILTER_SIZE 11
+#define ALPHA 1
+#define BLOCK_DIM 16
+#define TILE_SIZE (ALPHA * BLOCK_DIM) + (2 * BLUR_SIZE);
 
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
+// __global__ void blurKernel(float *out, float *in, int width, int height) 
+// {
+//   __shared__ float ds_in[tileSize][tileSize];
+//   int Col = blockIdx.x * blockDim.x + threadIdx.x;
+//   int Row = blockIdx.y * blockDim.y + threadIdx.y;
+  
+//   if (Col < width && Row < height) 
+//   {
+//     int curRow = Row + blurRow;
+//     int curCol = Col + blurCol;
+
+//     if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
+//     {
+//       ds_in[threadIdx.y][threadIdx.x] = inImg[curRow*width + curCol];
+//     }
+
+
+
+//     float pixVal = 0; int pixels = 0;
+//     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
+//     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
+//     {
+//       for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
+//       {
+//         int curRow = Row + blurRow;
+//         int curCol = Col + blurCol;
+//         //printf("curCol: %d\n", curCol);
+//         //printf("curRow: %d\n", curRow);
+//         // Verify we have a valid image pixel
+//         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
+//         {
+//           ds_in[threadIdx.y][threadIdx.x] = inImg[curRow*width + curCol];
+//           pixVal += in[curRow * width + curCol];
+//           // printf("pixVal: %f\n", pixVal);
+//           // printf("curRow * width + curCol: %d\n", (curRow * width + curCol));
+//           // printf("in: %f\n", in[curRow * width + curCol]);
+//           // Keep track of number of pixels in the accumulated total
+//           pixels++;
+//         }
+//       }
+//     }
+//     //printf("pixVal: %f\n", pixVal);
+//     //printf("pixels: %d\n", pixels);
+//     // Write our new average pixel value out
+//     out[Row * width + Col] = (float)(pixVal / pixels);
+//     //printf("Row * width + Col: %d\n", Row * width + Col);
+//     //printf("out: %f\n", out[Row * width + Col]);
+//   }
+// }
+
+
 __global__ void blurKernel(float *out, float *in, int width, int height) 
 {
   int Col = blockIdx.x * blockDim.x + threadIdx.x;
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
-  //printf("Col: %d\n", Col);
-  //printf("Row: %d\n", Row);
-  
+
+  printf("Col: %d\n", Col);
+  printf("Row: %d\n", Row);
+
+  printf("tx: %d\n", threadIdx.x);
+  printf("ty: %d\n", threadIdx.y);
+
   // for(int i = 0; i < 25; i++)
   // {
   //   printf("img[%d]: %f \n", i, in[i]);
@@ -184,11 +241,11 @@ int main(int argc, char *argv[]) {
   // Transfer data from CPU to GPU
   cudaMemcpy(deviceInputImageData, hostInputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyHostToDevice);
   
-  dim3 dimBlock(8, 8, 1);
-  dim3 dimGrid(ceil(imageWidth/8.0), ceil(imageHeight/8.0), 1);
+  //dim3 dimBlock(8, 8, 1);
+  //dim3 dimGrid(ceil(imageWidth/8.0), ceil(imageHeight/8.0), 1);
 
-  // dim3 dimBlock(1024, 1, 1);
-  // dim3 dimGrid(3, 3840, 1);
+   dim3 dimBlock(1024, 1, 1);
+   dim3 dimGrid(3, 1, 1);
   
   // Call your GPU kernel 10 times
   for(int i = 0; i < 10; i++)
