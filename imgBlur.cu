@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
   cudaMemcpy(deviceInputImageData, hostInputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyHostToDevice);
   
   dim3 dimBlock(8, 8, 1);
-  dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
+  dim3 dimGrid(ceil(imageWidth/8.0), ceil(imageHeight/8.0), 1);
 
   // dim3 dimBlock(1024, 1, 1);
   // dim3 dimGrid(3, 3840, 1);
