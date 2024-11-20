@@ -20,8 +20,8 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 {
   int Col = blockIdx.x * blockDim.x + threadIdx.x;
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
-  printf("Col: %d\n", Col);
-  printf("Row: %d\n", Row);
+  //printf("Col: %d\n", Col);
+  //printf("Row: %d\n", Row);
   
   // for(int i = 0; i < 25; i++)
   // {
@@ -53,12 +53,12 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         }
       }
     }
-    printf("pixVal: %f\n", pixVal);
-    printf("pixels: %d\n", pixels);
+    //printf("pixVal: %f\n", pixVal);
+    //printf("pixels: %d\n", pixels);
     // Write our new average pixel value out
     out[Row * width + Col] = (float)(pixVal / pixels);
-    printf("Row * width + Col: %d\n", Row * width + Col);
-    printf("out: %f\n", out[Row * width + Col]);
+    //printf("Row * width + Col: %d\n", Row * width + Col);
+    //printf("out: %f\n", out[Row * width + Col]);
   }
 }
 
