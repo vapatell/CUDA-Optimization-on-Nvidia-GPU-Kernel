@@ -244,8 +244,8 @@ int main(int argc, char *argv[]) {
   //dim3 dimBlock(8, 8, 1);
   //dim3 dimGrid(ceil(imageWidth/8.0), ceil(imageHeight/8.0), 1);
 
-   dim3 dimBlock(1024, 1, 1);
-   dim3 dimGrid(3, 1, 1);
+   dim3 dimBlock(10, 1, 1);
+   dim3 dimGrid(1, 1, 1);
   
   // Call your GPU kernel 10 times
   for(int i = 0; i < 10; i++)
