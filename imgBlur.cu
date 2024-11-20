@@ -184,15 +184,18 @@ int main(int argc, char *argv[]) {
   // Transfer data from CPU to GPU
   cudaMemcpy(deviceInputImageData, hostInputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyHostToDevice);
   
-  //dim3 dimBlock(16, 16, 1);
-  //dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
+  // dim3 dimBlock(16, 16, 1);
+  // dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
+
+  dim3 dimBlock(45, 45, 1);
+  dim3 dimGrid(1, 1, 1);
   
   // Call your GPU kernel 10 times
   for(int i = 0; i < 1; i++)
   {
     printf("iter: %d\n", i);
-    //blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
-    blurKernel<<<2, 1025>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+    blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+    //blurKernel<<<2, 1025>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
   }
   // Transfer data from GPU to CPU
   cudaMemcpy(hostOutputImageData, deviceOutputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyDeviceToHost);
