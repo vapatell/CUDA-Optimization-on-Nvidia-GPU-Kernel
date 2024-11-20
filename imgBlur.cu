@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
   dim3 dimGrid(3, 3840, 1);
   
   // Call your GPU kernel 10 times
-  for(int i = 0; i < 1; i++)
+  for(int i = 0; i < 11; i++)
   {
     printf("iter: %d\n", i);
     blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
