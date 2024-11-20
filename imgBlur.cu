@@ -184,11 +184,11 @@ int main(int argc, char *argv[]) {
   // Transfer data from CPU to GPU
   cudaMemcpy(deviceInputImageData, hostInputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyHostToDevice);
   
-  // dim3 dimBlock(16, 16, 1);
-  // dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
+  dim3 dimBlock(16, 16, 1);
+  dim3 dimGrid(ceil(imageWidth/16.0), ceil(imageHeight/16.0), 1);
 
-  dim3 dimBlock(1024, 1, 1);
-  dim3 dimGrid(3, 3840, 1);
+  // dim3 dimBlock(1024, 1, 1);
+  // dim3 dimGrid(3, 3840, 1);
   
   // Call your GPU kernel 10 times
   //for(int i = 0; i < 11; i++)
