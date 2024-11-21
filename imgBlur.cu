@@ -246,7 +246,8 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 
   if (Col < width && Row < height) 
   {
-    sharedTile = in[Row * width + Col];
+    sharedTile[Row * width + Col] = in[Row * width + Col];
+    __syncthreads();
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
@@ -265,6 +266,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         }
       }
     }
+    
     //printf("pixVal: %f\n", pixVal);
     //printf("pixels: %d\n", pixels);
     // Write our new average pixel value out
