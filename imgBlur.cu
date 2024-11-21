@@ -45,6 +45,9 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 
     __syncthreads();
 
+    printf("tx: %d\n", tx);
+    printf("ty: %d\n", ty);
+
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
     if((tx >= BLUR_SIZE) && (tx < TILE_DIM-BLUR_SIZE) && (ty >= BLUR_SIZE) && (ty < TILE_DIM-BLUR_SIZE))
