@@ -56,7 +56,7 @@ __global__ void blurKernel(float* outImg, float* inImg, int width, int height) {
         // instantiate accumulator
         int numPixels = 0;
         int cumSum = 0;
-    
+        printf("%d\n", tx);
         // only a subset of threads in block need to do computation
         if ((tx >= FILTER_SIZE) && (ty >= FILTER_SIZE) && (ty < bdy - FILTER_SIZE) && (tx < bdx - FILTER_SIZE)) {
             // top-left corner coordinates for the filter
