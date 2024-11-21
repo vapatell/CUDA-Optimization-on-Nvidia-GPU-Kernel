@@ -14,8 +14,8 @@
 #define BLUR_SIZE 21
 //#define ALPHA 1
 #define BLOCK_DIM 8
-#define TILE_DIM (BLOCK_DIM + (2 * BLUR_SIZE))
-
+#define TILE_DIM 8
+//(BLOCK_DIM + (2 * BLUR_SIZE))
 // #define FILTER_SIZE 15
 // #define BLOCK_SIZE 16
 // #define AUGMENTED (BLOCK_SIZE + 2 * FILTER_SIZE)
@@ -266,7 +266,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         }
       }
     }
-    
+
     //printf("pixVal: %f\n", pixVal);
     //printf("pixels: %d\n", pixels);
     // Write our new average pixel value out
