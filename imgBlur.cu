@@ -25,62 +25,91 @@
 
 __global__ void blurKernel(float* outImg, float* inImg, int width, int height) {
     int filterRow, filterCol;
-    int cornerRow, cornerCol;
     int filterSize = 2 * FILTER_SIZE + 1;
-    int tx = threadIdx.x; int ty = threadIdx.y;
-    int bx = blockIdx.x; int by = blockIdx.y;
-    int bdx = blockDim.x; int bdy = blockDim.y;
+    int tx = threadIdx.x; 
+    int ty = threadIdx.y;
+    int bx = blockIdx.x; 
+    int by = blockIdx.y;
+    int bdx = blockDim.x; 
+    int bdy = blockDim.y;
 
-    // compute global thread coordinates in output image
+    // Compute global coordinates in the output image
     int row = by * (bdy - 2 * FILTER_SIZE) + ty;
     int col = bx * (bdx - 2 * FILTER_SIZE) + tx;
 
-    // make sure thread is within augmented boundaries
-    if ((row < height + FILTER_SIZE) && (col < width + FILTER_SIZE)) {
-        // allocate a 2D chunk of shared memory
-        __shared__ float chunk[AUGMENTED][AUGMENTED];
+    // Make sure thread is within bounds of the image
+    if ((row < height) && (col < width)) {
+        // Allocate shared memory for a tile including padding for the filter
+        __shared__ float tile[BLOCK_SIZE + 2 * FILTER_SIZE][BLOCK_SIZE + 2 * FILTER_SIZE];
 
-        // load data into shared memory
+        // Load data into shared memory with padding for the filter
         int relativeRow = row - FILTER_SIZE;
         int relativeCol = col - FILTER_SIZE;
-        if ((relativeRow < height) && (relativeCol < width) && (relativeRow >= 0) && (relativeCol >= 0)) {
-            chunk[ty][tx] = inImg[relativeRow * width + relativeCol];
-        }
-        else {
-            chunk[ty][tx] = 0;
+        if ((relativeRow >= 0) && (relativeRow < height) && (relativeCol >= 0) && (relativeCol < width)) {
+            tile[ty + FILTER_SIZE][tx + FILTER_SIZE] = inImg[relativeRow * width + relativeCol];
+        } else {
+            tile[ty + FILTER_SIZE][tx + FILTER_SIZE] = 0;  // Out-of-bounds pixels set to 0
         }
 
-        // synchronize threads to ensure all threads have loaded data into shared memory
+        // Load the halo values from the borders into shared memory
+        if (ty < FILTER_SIZE) {
+            // Top halo
+            if (relativeRow - FILTER_SIZE >= 0) {
+                tile[ty][tx + FILTER_SIZE] = inImg[(relativeRow - FILTER_SIZE) * width + relativeCol];
+            } else {
+                tile[ty][tx + FILTER_SIZE] = 0;
+            }
+            // Bottom halo
+            if (relativeRow + bdy < height) {
+                tile[ty + bdy + FILTER_SIZE][tx + FILTER_SIZE] = inImg[(relativeRow + bdy) * width + relativeCol];
+            } else {
+                tile[ty + bdy + FILTER_SIZE][tx + FILTER_SIZE] = 0;
+            }
+        }
+
+        if (tx < FILTER_SIZE) {
+            // Left halo
+            if (relativeCol - FILTER_SIZE >= 0) {
+                tile[ty + FILTER_SIZE][tx] = inImg[relativeRow * width + (relativeCol - FILTER_SIZE)];
+            } else {
+                tile[ty + FILTER_SIZE][tx] = 0;
+            }
+            // Right halo
+            if (relativeCol + bdx < width) {
+                tile[ty + FILTER_SIZE][tx + bdx + FILTER_SIZE] = inImg[relativeRow * width + (relativeCol + bdx)];
+            } else {
+                tile[ty + FILTER_SIZE][tx + bdx + FILTER_SIZE] = 0;
+            }
+        }
+
+        // Synchronize threads to make sure shared memory is fully populated
         __syncthreads();
 
-        // instantiate accumulator
-        int numPixels = 0;
+        // Instantiate accumulator for the blur
         int cumSum = 0;
-        //printf("tx = %d\n", tx);
-        // only a subset of threads in block need to do computation
-        //if ((tx >= FILTER_SIZE) && (ty >= FILTER_SIZE) && (ty < bdy - FILTER_SIZE) && (tx < bdx - FILTER_SIZE)) {
-            // top-left corner coordinates for the filter
-            cornerRow = ty - FILTER_SIZE;
-            cornerCol = tx - FILTER_SIZE;
-            //printf("here");
+        int numPixels = 0;
+
+        // Only the threads in the center of the block should do computation
+        if (tx >= FILTER_SIZE && tx < bdx - FILTER_SIZE && ty >= FILTER_SIZE && ty < bdy - FILTER_SIZE) {
+            // Accumulate sum of the filter window
             for (int i = 0; i < filterSize; i++) {
                 for (int j = 0; j < filterSize; j++) {
-                    // filter coordinates
-                    filterRow = cornerRow + i;
-                    filterCol = cornerCol + j;
+                    int filterRow = ty + i - FILTER_SIZE;
+                    int filterCol = tx + j - FILTER_SIZE;
 
-                    // accumulate sum
-                    if ((filterRow >= 0) && (filterRow < height) && (filterCol >= 0) && (filterCol < width)) {
-                        cumSum += chunk[filterRow][filterCol];
+                    // Make sure the coordinates are within bounds
+                    if (filterRow >= 0 && filterRow < height && filterCol >= 0 && filterCol < width) {
+                        cumSum += tile[filterRow + FILTER_SIZE][filterCol + FILTER_SIZE];
                         numPixels++;
                     }
                 }
             }
-            // write result to global memory
-            outImg[relativeRow * width + relativeCol] = (float)(cumSum / numPixels);
-       // }
+            // Write the result to global memory
+            outImg[row * width + col] = (float)(cumSum / numPixels);
+        }
     }
 }
+
 
 
 // __global__ void blurKernel(float *out, const float *in, int width, int height) {
