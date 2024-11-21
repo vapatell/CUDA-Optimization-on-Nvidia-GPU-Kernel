@@ -245,7 +245,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   //float *sharedTile = tile;
 
   tile[Row * width + Col] = in[Row * width + Col];
-  __syncthreads();
+  //__syncthreads();
 
   if (Col < width && Row < height) 
   {
