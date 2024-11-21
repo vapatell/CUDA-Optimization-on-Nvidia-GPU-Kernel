@@ -308,8 +308,8 @@ int main(int argc, char *argv[]) {
   ////////////////////////////////////////////////
   //@@ INSERT AND UPDATE YOUR CODE HERE
 
-  cudaHostAlloc((void **) &hostInputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
-  cudaHostAlloc((void **) &hostOutputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
+  //cudaHostAlloc((void **) &hostInputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
+  //cudaHostAlloc((void **) &hostOutputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
 
   // Allocate cuda memory for device input and ouput image data
   cudaMalloc((void **)&deviceInputImageData, imageWidth * imageHeight * sizeof(float));
