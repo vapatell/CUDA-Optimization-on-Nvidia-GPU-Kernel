@@ -242,9 +242,9 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
   extern __shared__ float tile[BLOCK_DIM*BLOCK_DIM];
-  //float *sharedTile = tile;
+  float *sharedTile = tile;
 
-  tile[Row * width + Col] = in[Row * width + Col];
+  sharedTile[Row * width + Col] = in[Row * width + Col];
   __syncthreads();
 
   if (Col < width && Row < height) 
@@ -263,7 +263,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         // Verify we have a valid image pixel
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
-          pixVal += tile[curRow * width + curCol];
+          pixVal += sharedTile[curRow * width + curCol];
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
