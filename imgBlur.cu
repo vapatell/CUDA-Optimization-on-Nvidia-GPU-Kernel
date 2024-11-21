@@ -246,7 +246,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
  __shared__ float tile[BLOCK_DIM][BLOCK_DIM]; // 2D shared memory array
   //float *sharedTile = tile;
   //printf("here0");
-   tile[Row][Col] = in[Row * width + Col];
+   tile[tx][ty] = in[Row * width + Col];
   __syncthreads();
   //printf("tile[%d][%d] = %f\n", ty, tx, tile[ty][tx]);
   if (Col < width && Row < height) 
@@ -266,8 +266,8 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
           //pixVal += tile[curRow * width + curCol];
-          pixVal += tile[Row][Col];
-          printf("tile[%d][%d] = %f\n", Row, Col, tile[Row][Col]);
+          pixVal += tile[tx][ty];
+          //printf("tile[%d][%d] = %f\n", ty, tx, tile[ty][tx]);
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
