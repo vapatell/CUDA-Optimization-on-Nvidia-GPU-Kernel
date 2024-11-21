@@ -242,14 +242,15 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
   extern __shared__ float tile[];
-  float *sharedTile = tile;
+  //float *sharedTile = tile;
+
+  tile[Row * width + Col] = in[Row * width + Col];
+  __syncthreads();
 
   if (Col < width && Row < height) 
   {
     printf("here");
-    sharedTile[Row * width + Col] = in[Row * width + Col];
-    __syncthreads();
-    
+        
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
