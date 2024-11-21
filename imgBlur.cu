@@ -261,10 +261,10 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
       {
         int curRow = Row + blurRow;
         int curCol = Col + blurCol;
-        printf("here2");
-        // Verify we have a valid image pixel
+                // Verify we have a valid image pixel
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
+          printf("here2");
           //pixVal += tile[curRow * width + curCol];
           pixVal += tile[curRow][curCol];
           printf("tile[%d][%d] = %f\n", ty, tx, tile[curRow][curCol]);
