@@ -235,7 +235,6 @@
 //   }
 // }
 
-
 __global__ void blurKernel(float *out, float *in, int width, int height) 
 {
   int Col = blockIdx.x * blockDim.x + threadIdx.x;
@@ -262,12 +261,8 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
       }
     }
 
-    //printf("pixVal: %f\n", pixVal);
-    //printf("pixels: %d\n", pixels);
     // Write our new average pixel value out
     out[Row * width + Col] = (float)(pixVal / pixels);
-    //printf("Row * width + Col: %d\n", Row * width + Col);
-    //printf("out: %f\n", out[Row * width + Col]);
   }
 }
 
@@ -307,14 +302,14 @@ int main(int argc, char *argv[]) {
   hostOutputImageData = wbImage_getData(outputImage);
   goldOutputImageData = wbImage_getData(goldImage);
 
-  printf("imgWidth: %d\n", imageWidth);
-  printf("imgHeight: %d\n", imageHeight);
-
   // Start timer
   timespec timer = tic();
   
   ////////////////////////////////////////////////
   //@@ INSERT AND UPDATE YOUR CODE HERE
+
+  cudaHostAlloc((void **) &hostInputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
+  cudaHostAlloc((void **) &hostOutputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
 
   // Allocate cuda memory for device input and ouput image data
   cudaMalloc((void **)&deviceInputImageData, imageWidth * imageHeight * sizeof(float));
