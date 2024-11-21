@@ -13,7 +13,7 @@
 
 #define BLUR_SIZE 21
 #define ALPHA 1
-#define BLOCK_DIM 8
+#define BLOCK_DIM 16
 #define TILE_DIM (ALPHA * BLOCK_DIM) + (2 * BLUR_SIZE)
 
 ///////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height) {
 
     // Calculate the starting position for the shared memory tile
     int sharedWidth = blockDim.x + 2 * BLUR_SIZE;
-    int sharedHeight = blockDim.y + 2 * BLUR_SIZE;
+    //int sharedHeight = blockDim.y + 2 * BLUR_SIZE;
 
     // Shared memory tile access
     float *sharedTile = tile;
