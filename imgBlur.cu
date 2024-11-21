@@ -274,7 +274,7 @@ int main(int argc, char *argv[]) {
   int imageHeight;
   char *inputImageFile;
   wbImage_t inputImage;
-  //wbImage_t outputImage;
+  wbImage_t outputImage;
   wbImage_t goldImage;
   float *hostInputImageData;
   float *hostOutputImageData;
@@ -364,7 +364,7 @@ int main(int argc, char *argv[]) {
   cudaFree(deviceInputImageData);
   cudaFree(deviceOutputImageData);
 
-  //wbImage_delete(outputImage);
+  wbImage_delete(outputImage);
   wbImage_delete(inputImage);
 
   return 0;
