@@ -251,7 +251,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   //printf("tile[%d][%d] = %f\n", ty, tx, tile[ty][tx]);
   if (Col < width && Row < height) 
   {
-    //printf("here2");
+    printf("here2");
         
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
