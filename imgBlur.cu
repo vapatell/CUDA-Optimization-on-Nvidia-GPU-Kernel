@@ -255,7 +255,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         // Verify we have a valid image pixel
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
-          pixVal += tile[curRow * width + curCol];
+          pixVal += in[curRow * width + curCol];
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
