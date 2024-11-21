@@ -241,11 +241,11 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   int Col = blockIdx.x * blockDim.x + threadIdx.x;
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
-  __shared__ float tile[BLOCK_DIM*BLOCK_DIM];
+ __shared__ float tile[BLOCK_DIM][BLOCK_DIM]; // 2D shared memory array
   //float *sharedTile = tile;
   printf("here0");
-  tile[threadIdx.y * width + threadIdx.x] = in[Row * width + Col];
-  //__syncthreads();
+   tile[threadIdx.y][threadIdx.x] = in[Row * width + Col];
+  __syncthreads();
   printf("here1");
   if (Col < width && Row < height) 
   {
