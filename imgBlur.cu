@@ -20,7 +20,7 @@
 //@@ INSERT YOUR CODE HERE
 __global__ void blurKernel(float *out, float *in, int width, int height) 
 {
-  __shared__ float ds_in[tileSize][tileSize];
+  __shared__ float ds_in[TILE_DIM][TILE_DIM];
 
   // Orig Col/Row bounded within the 8x8 or 16x16 - subtracting 2*BLUR_SIZE ensures this behaviour
   int Col = blockIdx.x * (blockDim.x - (2 * BLUR_SIZE)) + threadIdx.x;
@@ -44,7 +44,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
-    if(threadIdx.x >= BLUR_SIZE && threadIdx.x < TILE_DIM-BLUR_SIZE && threadIdx.y >= BLUR_SIZE && threadIdx.y < TILE_DIM-BLUR_SIZE)
+    if((threadIdx.x >= BLUR_SIZE) && (threadIdx.x < TILE_DIM-BLUR_SIZE) && (threadIdx.y >= BLUR_SIZE) && (threadIdx.y < TILE_DIM-BLUR_SIZE))
       
       for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
       {
