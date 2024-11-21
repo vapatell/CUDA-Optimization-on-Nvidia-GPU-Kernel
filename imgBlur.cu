@@ -38,7 +38,7 @@ __global__ void blurKernel(float* outImg, float* inImg, int width, int height) {
     // make sure thread is within augmented boundaries
     if ((row < height + FILTER_SIZE) && (col < width + FILTER_SIZE)) {
         // allocate a 2D chunk of shared memory
-        __shared__ unsigned float chunk[AUGMENTED][AUGMENTED];
+        __shared__ float chunk[AUGMENTED][AUGMENTED];
 
         // load data into shared memory
         int relativeRow = row - FILTER_SIZE;
