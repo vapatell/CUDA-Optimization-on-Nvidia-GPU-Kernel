@@ -25,6 +25,9 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   // Orig Col/Row bounded within the 8x8 or 16x16 - subtracting 2*BLUR_SIZE ensures this behaviour
   int Col = blockIdx.x * (blockDim.x - (2 * BLUR_SIZE)) + threadIdx.x;
   int Row = blockIdx.y * (blockDim.y - (2 * BLUR_SIZE)) + threadIdx.y;
+
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
   
   if (Col < width && Row < height) 
   {
@@ -33,25 +36,25 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 
     if(tileRow > -1 && tileRow < height && tileCol > -1 && tileCol < width) 
     {
-      ds_in[threadIdx.y][threadIdx.x] = in[tileRow * width + tileCol];
+      ds_in[ty][tx] = in[tileRow * width + tileCol];
     }
     else
     {
-      ds_in[threadIdx.y][threadIdx.x] = 0;
+      ds_in[ty][tx] = 0;
     }
 
     __syncthreads();
 
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
-    if((threadIdx.x >= BLUR_SIZE) && (threadIdx.x < TILE_DIM-BLUR_SIZE) && (threadIdx.y >= BLUR_SIZE) && (threadIdx.y < TILE_DIM-BLUR_SIZE))
+    if((tx >= BLUR_SIZE) && (tx < TILE_DIM-BLUR_SIZE) && (ty >= BLUR_SIZE) && (ty < TILE_DIM-BLUR_SIZE))
       
       for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
       {
         for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
         {
-          int curRow = threadIdx.y + blurRow;
-          int curCol = threadIdx.x + blurCol;
+          int curRow = ty + blurRow;
+          int curCol = tx + blurCol;
           //printf("curCol: %d\n", curCol);
           //printf("curRow: %d\n", curRow);
           // Verify we have a valid image pixel
