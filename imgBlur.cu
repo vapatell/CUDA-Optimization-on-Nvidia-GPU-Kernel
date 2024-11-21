@@ -52,20 +52,20 @@
 //         // Load the main pixel into the center of the shared memory tile
 //         sharedTile[sharedRow * sharedWidth + sharedCol] = in[Row * width + Col];
 
-//         // Load the halo (border) pixels
+//         // Load the border pixels
 //         if (localRow < BLUR_SIZE) {
-//             // Top halo
+//             // Top
 //             int globalRow = max(Row - BLUR_SIZE, 0);
 //             sharedTile[(localRow) * sharedWidth + sharedCol] = in[globalRow * width + Col];
-//             // Bottom halo
+//             // Bottom 
 //             globalRow = min(Row + blockDim.y, height - 1);
 //             sharedTile[(localRow + blockDim.y + BLUR_SIZE) * sharedWidth + sharedCol] = in[globalRow * width + Col];
 //         }
 //         if (localCol < BLUR_SIZE) {
-//             // Left halo
+//             // Left 
 //             int globalCol = max(Col - BLUR_SIZE, 0);
 //             sharedTile[sharedRow * sharedWidth + localCol] = in[Row * width + globalCol];
-//             // Right halo
+//             // Right 
 //             globalCol = min(Col + blockDim.x, width - 1);
 //             sharedTile[sharedRow * sharedWidth + (localCol + blockDim.x + BLUR_SIZE)] = in[Row * width + globalCol];
 //         }
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
     //blurKernel<<<dimGrid, dimBlock, sharedMemSize>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
     blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
   }
-  
+
   // Transfer data from GPU to CPU
   cudaMemcpy(hostOutputImageData, deviceOutputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyDeviceToHost);
   ///////////////////////////////////////////////////////
@@ -290,3 +290,5 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+// references: ChatGPT, GitHub
