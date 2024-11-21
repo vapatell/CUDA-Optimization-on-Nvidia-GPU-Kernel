@@ -62,7 +62,7 @@ __global__ void blurKernel(float* outImg, float* inImg, int width, int height) {
             // top-left corner coordinates for the filter
             cornerRow = ty - FILTER_SIZE;
             cornerCol = tx - FILTER_SIZE;
-            printf("here");
+            //printf("here");
             for (int i = 0; i < filterSize; i++) {
                 for (int j = 0; j < filterSize; j++) {
                     // filter coordinates
