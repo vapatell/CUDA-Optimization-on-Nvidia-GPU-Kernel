@@ -14,7 +14,7 @@
 #define BLUR_SIZE 21
 #define ALPHA 1
 #define BLOCK_DIM 8
-#define TILE_DIM (ALPHA * BLOCK_DIM) + (2 * BLUR_SIZE);
+#define TILE_DIM (ALPHA * BLOCK_DIM) + (2 * BLUR_SIZE)
 
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
@@ -259,7 +259,8 @@ int main(int argc, char *argv[]) {
   //dim3 dimGrid(1, 1, 1);
 
   dim3 dimBlock(TILE_DIM, TILE_DIM, 1);
-  dim3 dimGrid(ceil(imageWidth/8.0), ceil(imageHeight/8.0), 1);
+  dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
+
   
   // Call your GPU kernel 10 times
   for(int i = 0; i < 10; i++)
