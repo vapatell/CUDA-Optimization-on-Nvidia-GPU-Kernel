@@ -13,7 +13,7 @@
 
 #define BLUR_SIZE 21
 //#define ALPHA 1
-#define BLOCK_DIM 8
+#define BLOCK_DIM 16
 #define TILE_DIM (BLOCK_DIM + (2 * BLUR_SIZE))
 
 ///////////////////////////////////////////////////////
@@ -255,8 +255,8 @@ int main(int argc, char *argv[]) {
   //dim3 dimGrid(1, 1, 1);
 
   dim3 dimBlock(BLOCK_DIM, BLOCK_DIM, 1);
-  //dim3 dimGrid((imageWidth + BLOCK_DIM - 1) / BLOCK_DIM, (imageHeight + BLOCK_DIM - 1) / BLOCK_DIM, 1);
-  dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
+  dim3 dimGrid((imageWidth + BLOCK_DIM - 1) / BLOCK_DIM, (imageHeight + BLOCK_DIM - 1) / BLOCK_DIM, 1);
+  //dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
 
   size_t sharedMemSize = TILE_DIM * TILE_DIM * sizeof(float);
   // Call your GPU kernel 10 times
