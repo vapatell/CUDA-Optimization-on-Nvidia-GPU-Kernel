@@ -13,7 +13,7 @@
 
 #define BLUR_SIZE 21
 #define ALPHA 1
-#define BLOCK_DIM 16
+#define BLOCK_DIM 32
 #define TILE_DIM (ALPHA * BLOCK_DIM) + (2 * BLUR_SIZE)
 
 ///////////////////////////////////////////////////////
