@@ -19,72 +19,75 @@
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
 
-__global__ void blurKernel(float *out, float *in, int width, int height) 
+__global__ void blurKernel(float *out, const float *in, int width, int height) 
 {
-    // Shared memory allocation
-    __shared__ float tile[TILE_DIM][TILE_DIM];
+    // Declare shared memory (1D array for simplicity)
+    extern __shared__ float tile[];
 
-    // Thread indices
+    // Thread and block indices
     int tx = threadIdx.x;
     int ty = threadIdx.y;
     int Col = blockIdx.x * blockDim.x + tx;
     int Row = blockIdx.y * blockDim.y + ty;
 
-    // Shared memory index
+    // Index in shared memory
     int sharedX = tx + BLUR_SIZE;
     int sharedY = ty + BLUR_SIZE;
 
-    // Load the data into shared memory
+    // Calculate 1D index for shared memory
+    int sharedIdx = sharedY * TILE_DIM + sharedX;
+
+    // Global memory index
+    int globalIdx = Row * width + Col;
+
+    // Load main region into shared memory
     if (Row < height && Col < width) {
-        tile[sharedY][sharedX] = in[Row * width + Col];
+        tile[sharedIdx] = in[globalIdx];
     } else {
-        // Handle out-of-bounds pixels (padding with zero)
-        tile[sharedY][sharedX] = 0.0f;
+        tile[sharedIdx] = 0.0f; // Zero padding for out-of-bound pixels
     }
 
-    // Load the halo region
+    // Load halo regions
     if (tx < BLUR_SIZE) {
         // Left halo
         int leftCol = Col - BLUR_SIZE;
-        tile[sharedY][tx] = (leftCol >= 0) ? in[Row * width + leftCol] : 0.0f;
+        tile[sharedY * TILE_DIM + tx] = (leftCol >= 0) ? in[Row * width + leftCol] : 0.0f;
 
         // Right halo
         int rightCol = Col + BLOCK_DIM;
-        if (rightCol < width) {
-            tile[sharedY][sharedX + BLOCK_DIM] = in[Row * width + rightCol];
-        } else {
-            tile[sharedY][sharedX + BLOCK_DIM] = 0.0f;
-        }
+        tile[sharedY * TILE_DIM + (sharedX + BLOCK_DIM)] = (rightCol < width) ? in[Row * width + rightCol] : 0.0f;
     }
     if (ty < BLUR_SIZE) {
         // Top halo
         int topRow = Row - BLUR_SIZE;
-        tile[ty][sharedX] = (topRow >= 0) ? in[topRow * width + Col] : 0.0f;
+        tile[ty * TILE_DIM + sharedX] = (topRow >= 0) ? in[topRow * width + Col] : 0.0f;
 
         // Bottom halo
         int bottomRow = Row + BLOCK_DIM;
-        if (bottomRow < height) {
-            tile[sharedY + BLOCK_DIM][sharedX] = in[bottomRow * width + Col];
-        } else {
-            tile[sharedY + BLOCK_DIM][sharedX] = 0.0f;
-        }
+        tile[(sharedY + BLOCK_DIM) * TILE_DIM + sharedX] = (bottomRow < height) ? in[bottomRow * width + Col] : 0.0f;
     }
 
-    __syncthreads(); // Ensure all threads load shared memory
+    // Synchronize threads to ensure all shared memory is loaded
+    __syncthreads();
 
-    // Perform the blur operation
-    float pixVal = 0.0f;
-    int pixels = 0;
+    // Perform the blurring operation
     if (Row < height && Col < width) {
+        float pixVal = 0.0f;
+        int pixels = 0;
+
+        // Iterate over the blur kernel in shared memory
         for (int blurRow = -BLUR_SIZE; blurRow <= BLUR_SIZE; ++blurRow) {
             for (int blurCol = -BLUR_SIZE; blurCol <= BLUR_SIZE; ++blurCol) {
-                pixVal += tile[sharedY + blurRow][sharedX + blurCol];
+                pixVal += tile[(sharedY + blurRow) * TILE_DIM + (sharedX + blurCol)];
                 pixels++;
             }
         }
-        out[Row * width + Col] = pixVal / pixels;
+
+        // Write the computed pixel value to the output image
+        out[globalIdx] = pixVal / pixels;
     }
 }
+
 
 
 
@@ -324,8 +327,8 @@ int main(int argc, char *argv[]) {
   //dim3 dimGrid(1, 1, 1);
 
   dim3 dimBlock(BLOCK_DIM, BLOCK_DIM, 1);
-  //dim3 dimGrid((imageWidth + BLOCK_DIM - 1) / BLOCK_DIM, (imageHeight + BLOCK_DIM - 1) / BLOCK_DIM, 1);
-  dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
+  dim3 dimGrid((imageWidth + BLOCK_DIM - 1) / BLOCK_DIM, (imageHeight + BLOCK_DIM - 1) / BLOCK_DIM, 1);
+  //dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
 
   size_t sharedMemSize = TILE_DIM * TILE_DIM * sizeof(float);
   // Call your GPU kernel 10 times
