@@ -78,7 +78,7 @@ __global__ void blurKernel(float* outImg, float* inImg, int width, int height) {
             }
             // write result to global memory
             outImg[relativeRow * width + relativeCol] = (float)(cumSum / numPixels);
-        }
+       // }
     }
 }
 
