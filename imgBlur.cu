@@ -86,6 +86,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height) {
     }
 }
 
+
 // __global__ void blurKernel(float *out, float *in, int width, int height) 
 // {
 //   __shared__ float ds_in[TILE_DIM][TILE_DIM];
