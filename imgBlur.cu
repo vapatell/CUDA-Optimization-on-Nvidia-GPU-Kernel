@@ -12,9 +12,10 @@
   } while (0)
 
 #define BLUR_SIZE 21
-//#define ALPHA 1
 #define BLOCK_DIM 8
-#define TILE_DIM 8
+
+//#define ALPHA 1
+//#define TILE_DIM 8
 //(BLOCK_DIM + (2 * BLUR_SIZE))
 // #define FILTER_SIZE 15
 // #define BLOCK_SIZE 16
@@ -22,86 +23,6 @@
 
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
-
-// __global__ void blurKernel(float *out, const float *in, int width, int height) {
-//     // Shared memory tile with halo
-//     extern __shared__ float tile[];
-
-//     // Calculate global and local thread indices
-//     int globalCol = blockIdx.x * blockDim.x + threadIdx.x;
-//     int globalRow = blockIdx.y * blockDim.y + threadIdx.y;
-
-//     int localCol = threadIdx.x + BLUR_SIZE;
-//     int localRow = threadIdx.y + BLUR_SIZE;
-
-//     // Shared memory tile dimensions (including halo)
-//     int sharedWidth = blockDim.x + 2 * BLUR_SIZE;
-
-//     // Load center pixels into shared memory
-//     if (globalCol < width && globalRow < height) {
-//         tile[localRow * sharedWidth + localCol] = in[globalRow * width + globalCol];
-//     } else {
-//         // Pad out-of-bounds with zero
-//         tile[localRow * sharedWidth + localCol] = 0.0f;
-//     }
-
-//     // Load halo pixels
-//     // Top halo
-//     if (threadIdx.y < BLUR_SIZE) {
-//         int topRow = max(globalRow - BLUR_SIZE, 0);
-//         tile[(threadIdx.y) * sharedWidth + localCol] = 
-//             (globalCol < width) ? in[topRow * width + globalCol] : 0.0f;
-//     }
-
-//     // Bottom halo
-//     if (threadIdx.y < BLUR_SIZE) {
-//         int bottomRow = min(globalRow + blockDim.y, height - 1);
-//         tile[(localRow + blockDim.y) * sharedWidth + localCol] = 
-//             (globalCol < width) ? in[bottomRow * width + globalCol] : 0.0f;
-//     }
-
-//     // Left halo
-//     if (threadIdx.x < BLUR_SIZE) {
-//         int leftCol = max(globalCol - BLUR_SIZE, 0);
-//         tile[localRow * sharedWidth + threadIdx.x] = 
-//             (globalRow < height) ? in[globalRow * width + leftCol] : 0.0f;
-//     }
-
-//     // Right halo
-//     if (threadIdx.x < BLUR_SIZE) {
-//         int rightCol = min(globalCol + blockDim.x, width - 1);
-//         tile[localRow * sharedWidth + (localCol + blockDim.x)] = 
-//             (globalRow < height) ? in[globalRow * width + rightCol] : 0.0f;
-//     }
-
-//     __syncthreads(); // Ensure all threads finish loading shared memory
-
-//     // Perform the blur operation
-//     if (globalCol < width && globalRow < height) {
-//         float pixVal = 0.0f;
-//         int numPixels = 0;
-
-//         // Iterate over the filter window
-//         for (int blurRow = -BLUR_SIZE; blurRow <= BLUR_SIZE; ++blurRow) {
-//             for (int blurCol = -BLUR_SIZE; blurCol <= BLUR_SIZE; ++blurCol) {
-//                 int sharedRowIdx = localRow + blurRow;
-//                 int sharedColIdx = localCol + blurCol;
-
-//                 // Ensure valid memory access within shared memory bounds
-//                 if (sharedRowIdx >= 0 && sharedRowIdx < sharedWidth && 
-//                     sharedColIdx >= 0 && sharedColIdx < sharedWidth) {
-//                     pixVal += tile[sharedRowIdx * sharedWidth + sharedColIdx];
-//                     numPixels++;
-//                 }
-//             }
-//         }
-
-//         // Write the result back to global memory
-//         out[globalRow * width + globalCol] = pixVal / numPixels;
-//     }
-// }
-
-
 
 // __global__ void blurKernel(float *out, float *in, int width, int height) {
 //     // Define the size of the shared memory tile
