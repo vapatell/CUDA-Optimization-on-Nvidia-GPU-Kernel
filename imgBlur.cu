@@ -291,8 +291,8 @@ int main(int argc, char *argv[]) {
   goldImage = wbImport(goldImageFile);
 
   // The input image is in grayscale, so the number of channels is 1
-  //imageWidth  = wbImage_getWidth(inputImage);
-  //imageHeight = wbImage_getHeight(inputImage);
+  imageWidth  = wbImage_getWidth(inputImage);
+  imageHeight = wbImage_getHeight(inputImage);
 
   cudaHostAlloc((void **) &hostInputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
   cudaHostAlloc((void **) &hostOutputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
@@ -300,8 +300,10 @@ int main(int argc, char *argv[]) {
   // Copy data from the original host memory (wbImage_getData) to pinned memory
   float *tempInputImageData = wbImage_getData(inputImage);
   memcpy(hostInputImageData, tempInputImageData, imageWidth * imageHeight * sizeof(float));
+  
   // Ensure `hostOutputImageData` is initialized if needed
-memset(hostOutputImageData, 0, imageWidth * imageHeight * sizeof(float));
+  memset(hostOutputImageData, 0, imageWidth * imageHeight * sizeof(float));
+  
   // Since the image is monochromatic, it only contains one channel
   outputImage = wbImage_new(imageWidth, imageHeight, 1);
 
