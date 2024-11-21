@@ -76,13 +76,13 @@ __global__ void blurKernel(float *out, float *in, int width, int height) {
                 int sharedRowIdx = sharedRow + blurRow;
                 int sharedColIdx = sharedCol + blurCol;
 
-                pixVal += static_cast<double>sharedTile[sharedRowIdx * sharedWidth + sharedColIdx];
+                pixVal += static_cast<double>(sharedTile[sharedRowIdx * sharedWidth + sharedColIdx]);
                 numPixels++;
             }
         }
 
         // Write the result back to global memory
-        out[Row * width + Col] = static_cast<float>pixVal / numPixels;
+        out[Row * width + Col] = static_cast<float>(pixVal / numPixels);
     }
 }
 
