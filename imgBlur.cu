@@ -77,13 +77,18 @@ __global__ void blurKernel(float *out, const float *in, int width, int height) {
         float pixVal = 0.0f;
         int numPixels = 0;
 
+        // Iterate over the filter window
         for (int blurRow = -BLUR_SIZE; blurRow <= BLUR_SIZE; ++blurRow) {
             for (int blurCol = -BLUR_SIZE; blurCol <= BLUR_SIZE; ++blurCol) {
                 int sharedRowIdx = localRow + blurRow;
                 int sharedColIdx = localCol + blurCol;
 
-                pixVal += tile[sharedRowIdx * sharedWidth + sharedColIdx];
-                numPixels++;
+                // Ensure valid memory access within shared memory bounds
+                if (sharedRowIdx >= 0 && sharedRowIdx < sharedWidth && 
+                    sharedColIdx >= 0 && sharedColIdx < sharedWidth) {
+                    pixVal += tile[sharedRowIdx * sharedWidth + sharedColIdx];
+                    numPixels++;
+                }
             }
         }
 
@@ -91,6 +96,7 @@ __global__ void blurKernel(float *out, const float *in, int width, int height) {
         out[globalRow * width + globalCol] = pixVal / numPixels;
     }
 }
+
 
 
 // __global__ void blurKernel(float *out, float *in, int width, int height) {
