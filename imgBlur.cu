@@ -58,7 +58,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         {
           int curRow = ty + blurRow;
           int curCol = tx + blurCol;
-          printf("curCol: %d\n", curCol);
+          //printf("curCol: %d\n", curCol);
           //printf("curRow: %d\n", curRow);
           // Verify we have a valid image pixel
           if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
