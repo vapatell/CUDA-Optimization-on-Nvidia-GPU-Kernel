@@ -242,9 +242,9 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
   extern __shared__ float tile[BLOCK_DIM*BLOCK_DIM];
-  float *sharedTile = tile;
+  //float *sharedTile = tile;
 
-  sharedTile[Row * width + Col] = in[Row * width + Col];
+  tile[Row * width + Col] = in[Row * width + Col];
   __syncthreads();
 
   if (Col < width && Row < height) 
@@ -263,7 +263,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         // Verify we have a valid image pixel
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
-          pixVal += sharedTile[curRow * width + curCol];
+          pixVal += tile[curRow * width + curCol];
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
@@ -345,9 +345,9 @@ int main(int argc, char *argv[]) {
   // Call your GPU kernel 10 times
   for(int i = 0; i < 10; i++)
   {
-    blurKernel<<<dimGrid, dimBlock, sharedMemSize>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+    //blurKernel<<<dimGrid, dimBlock, sharedMemSize>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
     //printf("iter: %d\n", i);
-    //blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
+    blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
     //blurKernel<<<2, 1025>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
   }
   // Transfer data from GPU to CPU
