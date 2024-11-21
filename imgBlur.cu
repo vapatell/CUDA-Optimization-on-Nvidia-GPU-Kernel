@@ -294,23 +294,24 @@ int main(int argc, char *argv[]) {
   imageWidth  = wbImage_getWidth(inputImage);
   imageHeight = wbImage_getHeight(inputImage);
 
+  // Pinning memory
   cudaHostAlloc((void **) &hostInputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
   cudaHostAlloc((void **) &hostOutputImageData, imageWidth*imageHeight* sizeof(float), cudaHostAllocDefault);
 
-  // Copy data from the original host memory (wbImage_getData) to pinned memory
-  float *tempInputImageData = wbImage_getData(inputImage);
-  memcpy(hostInputImageData, tempInputImageData, imageWidth * imageHeight * sizeof(float));
-  
-  // Ensure `hostOutputImageData` is initialized if needed
-  memset(hostOutputImageData, 0, imageWidth * imageHeight * sizeof(float));
-  
   // Since the image is monochromatic, it only contains one channel
   outputImage = wbImage_new(imageWidth, imageHeight, 1);
 
   // Get host input and output image data
-  hostInputImageData  = wbImage_getData(inputImage);
-  hostOutputImageData = wbImage_getData(outputImage);
+  //hostInputImageData  = wbImage_getData(inputImage);
+  //hostOutputImageData = wbImage_getData(outputImage);
   goldOutputImageData = wbImage_getData(goldImage);
+
+  // Copy data from the original host memory (wbImage_getData) to pinned memory
+  float *tempInputImageData = wbImage_getData(inputImage);
+  memcpy(hostInputImageData, tempInputImageData, imageWidth * imageHeight * sizeof(float));
+
+  // Ensure `hostOutputImageData` is initialized if needed
+  memset(hostOutputImageData, 0, imageWidth * imageHeight * sizeof(float));
 
   // Start timer
   timespec timer = tic();
@@ -324,12 +325,6 @@ int main(int argc, char *argv[]) {
 
   // Transfer data from CPU to GPU
   cudaMemcpy(deviceInputImageData, hostInputImageData, imageWidth * imageHeight * sizeof(float), cudaMemcpyHostToDevice);
-  
-  //dim3 dimBlock(8, 8, 1);
-  //dim3 dimGrid(ceil(imageWidth/8.0), ceil(imageHeight/8.0), 1);
-
-  //dim3 dimBlock(10, 1, 1);
-  //dim3 dimGrid(1, 1, 1);
 
   dim3 dimBlock(BLOCK_DIM, BLOCK_DIM, 1);
   dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
@@ -340,7 +335,6 @@ int main(int argc, char *argv[]) {
   for(int i = 0; i < 10; i++)
   {
     //blurKernel<<<dimGrid, dimBlock, sharedMemSize>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
-    //printf("iter: %d\n", i);
     blurKernel<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
     //blurKernel<<<2, 1025>>>(deviceOutputImageData, deviceInputImageData, imageWidth, imageHeight);
   }
