@@ -22,7 +22,7 @@
 __global__ void blurKernel(float *out, float *in, int width, int height) 
 {
     // Shared memory allocation
-    extern __shared__ float tile[];
+    __shared__ float tile[TILE_DIM][TILE_DIM];
 
     // Thread indices
     int tx = threadIdx.x;
@@ -30,55 +30,62 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
     int Col = blockIdx.x * blockDim.x + tx;
     int Row = blockIdx.y * blockDim.y + ty;
 
-    // Coordinates for shared memory
+    // Shared memory index
     int sharedX = tx + BLUR_SIZE;
     int sharedY = ty + BLUR_SIZE;
 
-    // Global index for the current pixel
-    int globalIdx = Row * width + Col;
-
-    // Load the main data into shared memory
+    // Load the data into shared memory
     if (Row < height && Col < width) {
-        tile[sharedY * TILE_DIM + sharedX] = in[globalIdx];
+        tile[sharedY][sharedX] = in[Row * width + Col];
     } else {
-        tile[sharedY * TILE_DIM + sharedX] = 0.0f; // Handle out-of-bounds
+        // Handle out-of-bounds pixels (padding with zero)
+        tile[sharedY][sharedX] = 0.0f;
     }
 
-    // Load the halo (boundary) regions
+    // Load the halo region
     if (tx < BLUR_SIZE) {
         // Left halo
         int leftCol = Col - BLUR_SIZE;
-        tile[sharedY * TILE_DIM + tx] = (leftCol >= 0) ? in[Row * width + leftCol] : 0.0f;
+        tile[sharedY][tx] = (leftCol >= 0) ? in[Row * width + leftCol] : 0.0f;
 
         // Right halo
         int rightCol = Col + BLOCK_DIM;
-        tile[sharedY * TILE_DIM + sharedX + BLOCK_DIM] = (rightCol < width) ? in[Row * width + rightCol] : 0.0f;
+        if (rightCol < width) {
+            tile[sharedY][sharedX + BLOCK_DIM] = in[Row * width + rightCol];
+        } else {
+            tile[sharedY][sharedX + BLOCK_DIM] = 0.0f;
+        }
     }
     if (ty < BLUR_SIZE) {
         // Top halo
         int topRow = Row - BLUR_SIZE;
-        tile[ty * TILE_DIM + sharedX] = (topRow >= 0) ? in[topRow * width + Col] : 0.0f;
+        tile[ty][sharedX] = (topRow >= 0) ? in[topRow * width + Col] : 0.0f;
 
         // Bottom halo
         int bottomRow = Row + BLOCK_DIM;
-        tile[(sharedY + BLOCK_DIM) * TILE_DIM + sharedX] = (bottomRow < height) ? in[bottomRow * width + Col] : 0.0f;
+        if (bottomRow < height) {
+            tile[sharedY + BLOCK_DIM][sharedX] = in[bottomRow * width + Col];
+        } else {
+            tile[sharedY + BLOCK_DIM][sharedX] = 0.0f;
+        }
     }
 
-    __syncthreads(); // Synchronize threads before computation
+    __syncthreads(); // Ensure all threads load shared memory
 
-    // Perform the blurring operation
+    // Perform the blur operation
+    float pixVal = 0.0f;
+    int pixels = 0;
     if (Row < height && Col < width) {
-        float pixVal = 0.0f;
-        int pixels = 0;
         for (int blurRow = -BLUR_SIZE; blurRow <= BLUR_SIZE; ++blurRow) {
             for (int blurCol = -BLUR_SIZE; blurCol <= BLUR_SIZE; ++blurCol) {
-                pixVal += tile[(sharedY + blurRow) * TILE_DIM + (sharedX + blurCol)];
+                pixVal += tile[sharedY + blurRow][sharedX + blurCol];
                 pixels++;
             }
         }
-        out[globalIdx] = pixVal / pixels;
+        out[Row * width + Col] = pixVal / pixels;
     }
 }
+
 
 
 // __global__ void blurKernel(float *out, float *in, int width, int height) {
