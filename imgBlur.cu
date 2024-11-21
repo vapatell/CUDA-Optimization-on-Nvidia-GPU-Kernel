@@ -240,34 +240,22 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 {
   int Col = blockIdx.x * blockDim.x + threadIdx.x;
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
-  int ty = threadIdx.y;
-  int tx = threadIdx.x;
-
- __shared__ float tile[BLOCK_DIM][BLOCK_DIM]; // 2D shared memory array
-  //float *sharedTile = tile;
-  //printf("here0");
-   tile[ty][tx] = in[Row * width + Col];
-  __syncthreads();
-  //printf("tile[%d][%d] = %f\n", ty, tx, tile[ty][tx]);
+  
   if (Col < width && Row < height) 
   {
-    
-        
     float pixVal = 0; int pixels = 0;
+
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
     {
       for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
       {
-        int curRow = ty + blurRow;
-        int curCol = tx + blurCol;
-                // Verify we have a valid image pixel
+        int curRow = Row + blurRow;
+        int curCol = Col + blurCol;
+        // Verify we have a valid image pixel
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
-          //printf("here2");
-          //pixVal += tile[curRow * width + curCol];
-          pixVal += tile[curRow][curCol];
-          //printf("tile[%d][%d] = %f\n", ty, tx, tile[curRow][curCol]);
+          pixVal += tile[curRow * width + curCol];
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
@@ -344,7 +332,7 @@ int main(int argc, char *argv[]) {
   dim3 dimBlock(BLOCK_DIM, BLOCK_DIM, 1);
   dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
   
-  size_t sharedMemSize = TILE_DIM * TILE_DIM * sizeof(float);
+  //size_t sharedMemSize = TILE_DIM * TILE_DIM * sizeof(float);
     
   // Call your GPU kernel 10 times
   for(int i = 0; i < 10; i++)
