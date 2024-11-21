@@ -19,72 +19,72 @@
 ///////////////////////////////////////////////////////
 //@@ INSERT YOUR CODE HERE
 
-__global__ void blurKernel(float *out, float *in, int width, int height) {
-    // Define the size of the shared memory tile
-    extern __shared__ float tile[];
+// __global__ void blurKernel(float *out, float *in, int width, int height) {
+//     // Define the size of the shared memory tile
+//     extern __shared__ float tile[];
 
-    // Calculate global row and column index for the thread
-    int Col = blockIdx.x * blockDim.x + threadIdx.x;
-    int Row = blockIdx.y * blockDim.y + threadIdx.y;
+//     // Calculate global row and column index for the thread
+//     int Col = blockIdx.x * blockDim.x + threadIdx.x;
+//     int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Calculate local row and column index within the block
-    int localCol = threadIdx.x;
-    int localRow = threadIdx.y;
+//     // Calculate local row and column index within the block
+//     int localCol = threadIdx.x;
+//     int localRow = threadIdx.y;
 
-    // Calculate the starting position for the shared memory tile
-    int sharedWidth = blockDim.x + 2 * BLUR_SIZE;
-    //int sharedHeight = blockDim.y + 2 * BLUR_SIZE;
+//     // Calculate the starting position for the shared memory tile
+//     int sharedWidth = blockDim.x + 2 * BLUR_SIZE;
+//     //int sharedHeight = blockDim.y + 2 * BLUR_SIZE;
 
-    // Shared memory tile access
-    float *sharedTile = tile;
+//     // Shared memory tile access
+//     float *sharedTile = tile;
 
-    // Global memory boundary check
-    if (Col < width && Row < height) {
-        // Copy data from global memory to shared memory (including border)
-        int sharedRow = localRow + BLUR_SIZE;
-        int sharedCol = localCol + BLUR_SIZE;
+//     // Global memory boundary check
+//     if (Col < width && Row < height) {
+//         // Copy data from global memory to shared memory (including border)
+//         int sharedRow = localRow + BLUR_SIZE;
+//         int sharedCol = localCol + BLUR_SIZE;
 
-        // Load the main pixel into the center of the shared memory tile
-        sharedTile[sharedRow * sharedWidth + sharedCol] = in[Row * width + Col];
+//         // Load the main pixel into the center of the shared memory tile
+//         sharedTile[sharedRow * sharedWidth + sharedCol] = in[Row * width + Col];
 
-        // Load the halo (border) pixels
-        if (localRow < BLUR_SIZE) {
-            // Top halo
-            int globalRow = max(Row - BLUR_SIZE, 0);
-            sharedTile[(localRow) * sharedWidth + sharedCol] = in[globalRow * width + Col];
-            // Bottom halo
-            globalRow = min(Row + blockDim.y, height - 1);
-            sharedTile[(localRow + blockDim.y + BLUR_SIZE) * sharedWidth + sharedCol] = in[globalRow * width + Col];
-        }
-        if (localCol < BLUR_SIZE) {
-            // Left halo
-            int globalCol = max(Col - BLUR_SIZE, 0);
-            sharedTile[sharedRow * sharedWidth + localCol] = in[Row * width + globalCol];
-            // Right halo
-            globalCol = min(Col + blockDim.x, width - 1);
-            sharedTile[sharedRow * sharedWidth + (localCol + blockDim.x + BLUR_SIZE)] = in[Row * width + globalCol];
-        }
+//         // Load the halo (border) pixels
+//         if (localRow < BLUR_SIZE) {
+//             // Top halo
+//             int globalRow = max(Row - BLUR_SIZE, 0);
+//             sharedTile[(localRow) * sharedWidth + sharedCol] = in[globalRow * width + Col];
+//             // Bottom halo
+//             globalRow = min(Row + blockDim.y, height - 1);
+//             sharedTile[(localRow + blockDim.y + BLUR_SIZE) * sharedWidth + sharedCol] = in[globalRow * width + Col];
+//         }
+//         if (localCol < BLUR_SIZE) {
+//             // Left halo
+//             int globalCol = max(Col - BLUR_SIZE, 0);
+//             sharedTile[sharedRow * sharedWidth + localCol] = in[Row * width + globalCol];
+//             // Right halo
+//             globalCol = min(Col + blockDim.x, width - 1);
+//             sharedTile[sharedRow * sharedWidth + (localCol + blockDim.x + BLUR_SIZE)] = in[Row * width + globalCol];
+//         }
 
-        __syncthreads(); // Ensure all threads have loaded their data into shared memory
+//         __syncthreads(); // Ensure all threads have loaded their data into shared memory
 
-        // Perform the blur operation
-        float pixVal = 0.0f;
-        int numPixels = 0;
+//         // Perform the blur operation
+//         float pixVal = 0.0f;
+//         int numPixels = 0;
 
-        for (int blurRow = -BLUR_SIZE; blurRow <= BLUR_SIZE; ++blurRow) {
-            for (int blurCol = -BLUR_SIZE; blurCol <= BLUR_SIZE; ++blurCol) {
-                int sharedRowIdx = sharedRow + blurRow;
-                int sharedColIdx = sharedCol + blurCol;
+//         for (int blurRow = -BLUR_SIZE; blurRow <= BLUR_SIZE; ++blurRow) {
+//             for (int blurCol = -BLUR_SIZE; blurCol <= BLUR_SIZE; ++blurCol) {
+//                 int sharedRowIdx = sharedRow + blurRow;
+//                 int sharedColIdx = sharedCol + blurCol;
 
-                pixVal += static_cast<double>(sharedTile[sharedRowIdx * sharedWidth + sharedColIdx]);
-                numPixels++;
-            }
-        }
+//                 pixVal += static_cast<double>(sharedTile[sharedRowIdx * sharedWidth + sharedColIdx]);
+//                 numPixels++;
+//             }
+//         }
 
-        // Write the result back to global memory
-        out[Row * width + Col] = static_cast<float>(pixVal / numPixels);
-    }
-}
+//         // Write the result back to global memory
+//         out[Row * width + Col] = static_cast<float>(pixVal / numPixels);
+//     }
+// }
 
 
 // __global__ void blurKernel(float *out, float *in, int width, int height) 
@@ -152,55 +152,49 @@ __global__ void blurKernel(float *out, float *in, int width, int height) {
 // }
 
 
-// __global__ void blurKernel(float *out, float *in, int width, int height) 
-// {
-//   int Col = blockIdx.x * blockDim.x + threadIdx.x;
-//   int Row = blockIdx.y * blockDim.y + threadIdx.y;
+__global__ void blurKernel(float *out, float *in, int width, int height) 
+{
+  int Col = blockIdx.x * blockDim.x + threadIdx.x;
+  int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
-//   printf("Col: %d\n", Col);
-//   printf("Row: %d\n", Row);
+  // for(int i = 0; i < 25; i++)
+  // {
+  //   printf("img[%d]: %f \n", i, in[i]);
+  //   //printf("goldimg[%d]: %f \n", i, goldOutputImageData[i]);
+  // }
 
-//   printf("tx: %d\n", threadIdx.x);
-//   printf("ty: %d\n", threadIdx.y);
-
-//   // for(int i = 0; i < 25; i++)
-//   // {
-//   //   printf("img[%d]: %f \n", i, in[i]);
-//   //   //printf("goldimg[%d]: %f \n", i, goldOutputImageData[i]);
-//   // }
-
-//   if (Col < width && Row < height) 
-//   {
-//     float pixVal = 0; int pixels = 0;
-//     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
-//     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
-//     {
-//       for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
-//       {
-//         int curRow = Row + blurRow;
-//         int curCol = Col + blurCol;
-//         //printf("curCol: %d\n", curCol);
-//         //printf("curRow: %d\n", curRow);
-//         // Verify we have a valid image pixel
-//         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
-//         {
-//           pixVal += in[curRow * width + curCol];
-//           // printf("pixVal: %f\n", pixVal);
-//           // printf("curRow * width + curCol: %d\n", (curRow * width + curCol));
-//           // printf("in: %f\n", in[curRow * width + curCol]);
-//           // Keep track of number of pixels in the accumulated total
-//           pixels++;
-//         }
-//       }
-//     }
-//     //printf("pixVal: %f\n", pixVal);
-//     //printf("pixels: %d\n", pixels);
-//     // Write our new average pixel value out
-//     out[Row * width + Col] = (float)(pixVal / pixels);
-//     //printf("Row * width + Col: %d\n", Row * width + Col);
-//     //printf("out: %f\n", out[Row * width + Col]);
-//   }
-// }
+  if (Col < width && Row < height) 
+  {
+    float pixVal = 0; int pixels = 0;
+    // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
+    for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
+    {
+      for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
+      {
+        int curRow = Row + blurRow;
+        int curCol = Col + blurCol;
+        //printf("curCol: %d\n", curCol);
+        //printf("curRow: %d\n", curRow);
+        // Verify we have a valid image pixel
+        if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
+        {
+          pixVal += in[curRow * width + curCol];
+          // printf("pixVal: %f\n", pixVal);
+          // printf("curRow * width + curCol: %d\n", (curRow * width + curCol));
+          // printf("in: %f\n", in[curRow * width + curCol]);
+          // Keep track of number of pixels in the accumulated total
+          pixels++;
+        }
+      }
+    }
+    //printf("pixVal: %f\n", pixVal);
+    //printf("pixels: %d\n", pixels);
+    // Write our new average pixel value out
+    out[Row * width + Col] = (float)(pixVal / pixels);
+    //printf("Row * width + Col: %d\n", Row * width + Col);
+    //printf("out: %f\n", out[Row * width + Col]);
+  }
+}
 
 ///////////////////////////////////////////////////////
 
@@ -263,7 +257,7 @@ int main(int argc, char *argv[]) {
   dim3 dimBlock(BLOCK_DIM, BLOCK_DIM, 1);
   dim3 dimGrid((unsigned int)ceil(imageWidth / BLOCK_DIM), (unsigned int)ceil(imageHeight / BLOCK_DIM), 1);
 
-  size_t sharedMemSize = (BLOCK_DIM + 2 * BLUR_SIZE) * (BLOCK_DIM + 2 * BLUR_SIZE) * sizeof(float);
+  size_t sharedMemSize = (TILE_DIM) * (TILE_DIM) * sizeof(float);
   // Call your GPU kernel 10 times
   for(int i = 0; i < 10; i++)
   {
