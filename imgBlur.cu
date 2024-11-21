@@ -50,15 +50,15 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
 
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
-    if((tx >= BLUR_SIZE) && (tx < TILE_DIM-BLUR_SIZE) && (ty >= BLUR_SIZE) && (ty < TILE_DIM-BLUR_SIZE))
-    {  
+    //if((tx >= BLUR_SIZE) && (tx < TILE_DIM-BLUR_SIZE) && (ty >= BLUR_SIZE) && (ty < TILE_DIM-BLUR_SIZE))
+    //{  
       for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
       {
         for(int blurCol = -BLUR_SIZE; blurCol < BLUR_SIZE+1; ++blurCol) 
         {
           int curRow = ty + blurRow;
           int curCol = tx + blurCol;
-          //printf("curCol: %d\n", curCol);
+          printf("curCol: %d\n", curCol);
           //printf("curRow: %d\n", curRow);
           // Verify we have a valid image pixel
           if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
@@ -72,7 +72,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
           }
         }
       }
-    }
+    //}
     //printf("pixVal: %f\n", pixVal);
     //printf("pixels: %d\n", pixels);
     // Write our new average pixel value out
