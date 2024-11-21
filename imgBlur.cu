@@ -241,10 +241,12 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
   int Col = blockIdx.x * blockDim.x + threadIdx.x;
   int Row = blockIdx.y * blockDim.y + threadIdx.y;
 
-  //__shared__ float tile[];
+  extern __shared__ float tile[];
+  float *sharedTile = tile;
 
   if (Col < width && Row < height) 
   {
+    sharedTile = in[Row * width + Col];
     float pixVal = 0; int pixels = 0;
     // Get the average of the surrounding 2xBLUR_SIZE x 2xBLUR_SIZE box
     for(int blurRow = -BLUR_SIZE; blurRow < BLUR_SIZE+1; ++blurRow) 
@@ -257,7 +259,7 @@ __global__ void blurKernel(float *out, float *in, int width, int height)
         // Verify we have a valid image pixel
         if(curRow > -1 && curRow < height && curCol > -1 && curCol < width) 
         {
-          pixVal += in[curRow * width + curCol];
+          pixVal += sharedTile[curRow * width + curCol];
           // Keep track of number of pixels in the accumulated total
           pixels++;
         }
